@@ -2,53 +2,73 @@ import shelve
 from dataclasses import dataclass
 # Working on RPG save system and ways to build class instances a bit more dynamically and finding ways of saving them
 
+# TODO: Steal some pokemon combat stuff and convert it for use here, weakness customization
+
 save = shelve.open("RPG_save")  # Opening the persistent database object
 # Currently, I have the main character object's key in the shelve database set to "Protag"
 
 
 @dataclass()
 class Technique:
-    name: str
-    power: int
-    cost: int
-    effect: list
+    name: str  # Name of the attack/technique/move, whatever you want to call it.
+    magnitude: int or float  # The magnitude of power, or healing percentage, or amount of buff/debuff in multiples
+    cost: int  # Cost to activate the move. (Always in energy? Or maybe ammo for guns, health cost like in Persona 4?)
+    target: str  # target possibilities: "Foe/Foes/Self/Ally/Party/All"
+    effect: str or list  # Oh, I didn't realize you could do this. Interesting.
+    description: str  # Describes what the move does
 
 
-gram_slice = Technique("Gram Slice", 25, 5, ["None"])
-tarukaja = Technique("Tarukaja", 0, 10, [1, "Attack"])
-bufu = Technique("Bufu", 20, 5, ["None"])
-zio = Technique("Zio", 20, 5, ["None"])
-zan = Technique("Zan", 20, 5, ["None"])
-agi = Technique("Agi", 20, 5, ["None"])
-needle_shot = Technique("Needle Shot", 15, 3, ["None"])
-dia = Technique("Dia", 0, 7, [0.25, "Health"])
+gram_slice = Technique("Gram Slice", 25, 5, "Foe", "Physical", "Light physical damage to 1 enemy")
+bufu = Technique("Bufu", 20, 5, "Foe", "Ice", "Light ice damage to 1 enemy")
+zio = Technique("Zio", 20, 5, "Foe", "Lightning", "Light lightning damage to 1 enemy")
+zan = Technique("Zan", 20, 5, "Foe", "Wind", "Light wind damage to 1 enemy")
+agi = Technique("Agi", 20, 5, "Foe", "Fire", "Light fire damage to 1 enemy")
+rapid_needle = Technique("Rapid Needle", 15, 3, "Foes", "Physical", "Light physical damage to all enemies")
+tarukaja = Technique("Tarukaja", 1, 8, "Ally", "Attack", "Increase 1 ally's attack power by 1 stage")
+rakunda = Technique("Rakunda", -1, 10, "Foe", "Defense", "Decrease 1 enemies defense by 1 stage")
+dia = Technique("Dia", 0.33, 7, "Ally", "Health", "Heal one ally for 1/3 of their max health")
 
-technique_list = [gram_slice, tarukaja, bufu, zio, zan, agi, needle_shot, dia]
+technique_list = [gram_slice, tarukaja, rakunda, bufu, zio, zan, agi, rapid_needle, dia]
 
 
 @dataclass()
-class Player:
+class Being:
     name: str
     level: int
     vitality: int
     strength: int
     magic: int
     moves: list
+    weaknesses: list
 
     def __post_init__(self):
+        # So these are the full/max values for individual stats
         self.health = self.vitality*7 + self.level*5
         self.energy = self.level*7 + self.vitality*3 + self.magic*2
+        self.defense = 100
+        self.evasion = 100
 
-        # Do active stats
+        # And these are the active ones that can be altered in battle
+        self.act_hp = self.health
+        self.act_en = self.energy
+        self.act_def = self.defense
+        self.act_eva = self.evasion
 
     # def name_self(self):
     #     #     name = input("What is your name? ")
     #     #     return name
 
 
-player_flynn = Player("Flynn", 1, 10, 10, 8, [gram_slice, tarukaja])
-player_isabeau = Player("Isabeau", 1, 7, 6, 13, [bufu, dia])
-player_custom = Player("Player", 1, 5, 5, 5, [])  # Default placeholder for the custom player object
+player_walter = Being("Walter", 3, 10, 10, 6, [gram_slice, tarukaja], ["Lightning"])
+player_isabeau = Being("Isabeau", 3, 7, 6, 13, [bufu, dia], ["Wind"])
+player_jonathan = Being("Jonathan", 3, 9, 8, 9, [zio, rakunda], ["Ice"])
+player_custom = Being("Player", 1, 5, 5, 5, [], [])  # Default placeholder for the custom player object
+
+slime = Being("Slime", 1, 4, 6, 6, [agi], ["Lightning", "Fire", "Ice", "Wind"])
+rodent = Being("Rodent", 1, 3, 7, 5, [tarukaja, rapid_needle], ["Fire", "Lightning"])
+mokoi = Being("Mokoi", 1, 6, 3, 6, [zio], ["Wind"])
+
+encounter_list = [slime, rodent, mokoi]
 
 
 def divider():
@@ -138,7 +158,7 @@ def choose_move(player):
 
     while True:
         for index, tech in enumerate(technique_list, 1):
-            print(f"{index}. {tech.name} | Power: {tech.power} | Cost: {tech.cost} | Effect: {tech.effect}")
+            print(f"{index}. {tech.name} | Power: {tech.magnitude} | Cost: {tech.cost} | Effect: {tech.effect}")
         divider()
         print("Please choose two abilities from the above list for your character.")
         ability_choice = input(f"Input the index of the move you want. Choices remaining: {ab_count} \n")

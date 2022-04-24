@@ -1,15 +1,13 @@
-# Testing to see the interplay between the shelve module and the dependencies of classes from imported files
-
 import shelve
 import RPGchar_creation as Rpg
-from RPGchar_creation import Player
+from RPGchar_creation import Being
 from RPGchar_creation import Technique
 
 SAVE = shelve.open("RPG_save")
 
-ziodyne = Technique("Ziodyne", 100, 30, ["None"])
+ziodyne = Technique("Ziodyne", 100, 30, "Foe", "Lightning")
 
-d = Player("Test", 5, 10, 8, 12, [Rpg.bufu, Rpg.tarukaja])
+d = Being("Test", 5, 10, 8, 12, [Rpg.bufu, Rpg.tarukaja])
 
 print(d)
 
