@@ -1,3 +1,5 @@
+# Testing to see the interplay between the shelve module and the dependencies of classes from imported files
+
 import shelve
 import RPGchar_creation as Rpg
 from RPGchar_creation import Player
