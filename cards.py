@@ -1,5 +1,11 @@
 import random
 from dataclasses import dataclass
+from enum import Enum, auto
+
+# Using two different methods for representing a standard deck of cards
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Number 1. The method I came up with myself
 
 suit_list = ["Diamonds", "Hearts", "Spades", "Clovers"]
 
@@ -9,7 +15,7 @@ class Card:
     suit: str
     value: str
 
-    card_dict = {
+    card_value_dict = {
         "Ace": 1,
         "Two": 2,
         "Three": 3,
@@ -107,8 +113,8 @@ general_deck = [ace_hearts, two_hearts, three_hearts, four_hearts, five_hearts, 
                 king_spades, ace_cloves, two_cloves, three_cloves, four_cloves, five_cloves, six_cloves, seven_cloves,
                 eight_cloves, nine_cloves, jack_cloves, queen_cloves, king_cloves]
 
-for card in card_types:
-    print(card.print_name(), Card.card_dict.get(card.value))
+# for card in card_types:
+#     print(card.print_name(), Card.card_value_dict.get(card.value))
 
 
 @dataclass()
@@ -131,10 +137,93 @@ class CardGame:
             print(cards.print_name())
 
 
-test_game = CardGame(general_deck, [], 5)
-print(len(test_game.deck))
-test_game.draw()
-test_game.draw()
-print(test_game.view_hand())
-print(len(test_game.deck))
+# test_game = CardGame(general_deck, [], 5)
+# print(len(test_game.deck))
+# test_game.draw()
+# test_game.draw()
+# print(test_game.view_hand())
+# print(len(test_game.deck))
 
+# ----------------------------------------------------------------------------------------------------------------------
+# Number two, a more advanced card deck creation making use of the enums module and creating many instances at once
+
+
+@dataclass()
+class Suit(Enum):
+    DIAMOND = auto()
+    HEART = auto()
+    CLOVE = auto()
+    SPADE = auto()
+
+
+@dataclass()
+class Value(Enum):
+    ACE = auto()
+    TWO = auto()
+    THREE = auto()
+    FOUR = auto()
+    FIVE = auto()
+    SIX = auto()
+    SEVEN = auto()
+    EIGHT = auto()
+    NINE = auto()
+    JACK = auto()
+    QUEEN = auto()
+    KING = auto()
+
+
+@dataclass()
+class Card:
+    suit: Suit
+    value: Value
+
+    def __str__(self):
+        return f"The {self.value} of {self.suit}s"
+
+    @property
+    def suit(self):
+        return self._suit
+
+    @property
+    def value(self):
+        return self._value
+
+    @suit.setter
+    def suit(self, suit: Suit):
+        if suit not in Suit:
+            raise Exception
+        self._suit = suit
+
+    @value.setter
+    def value(self, value: Value):
+        if value not in Value:
+            raise Exception
+        self._value = value
+
+
+@dataclass()
+class Deck:
+    # Initializing a full list of cards using this list comprehension
+    cards = [Card(s, v) for v in Value for s in Suit]
+
+    def __str__(self):
+        output = [f"{c}\n" for c in self.cards]
+        return "".join(output)
+
+
+# Creating an instance of the card class
+my_card = Card(Suit.CLOVE, Value.SIX)
+print(my_card)
+
+# Creating an instance of the deck class
+my_deck = Deck()
+print(len(my_deck.cards))
+
+# Printing the deck instance shows all the cards created in sequence, as expected
+print(my_deck)
+
+# Printing the object attribute itself for some reason doesn't represent the objects that were created accurately
+print(my_deck.cards)
+
+# However, accessing the values in list form shows off their attributes like they're supposed to
+print(my_deck.cards[23], my_deck.cards[14], my_deck.cards[15], my_deck.cards[16])
